@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{% static 'css/bootstrap.min.css'%}" rel="stylesheet">
+  <link href="{% static 'css/main.css' %}" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<body id="body-main">
+
+<div id="grad-main" class="jumbotron text-center"  style="background-color: navy;padding: 8em;">
+  <h1 id="title-main">DC Playground</h1>
+  <p id="subtitle">A Mock Trading System Designed Specifically for Cryptocurrencies </p>
+</div>
+
+<div class="container">
+{% block content %}
+        {% endblock %}
+</div>
+
+</body>
+</html>

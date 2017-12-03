@@ -1,0 +1,55 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground Dashboard{% endblock %}
+    {% block sidebar%}
+            <li><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li class="active"><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+      {% endblock%}
+      {% block content %}
+
+          <h2 class="sub-header">Orders</h2>
+			<hr class="my-4">
+			{% for order in orders %}
+
+				<div class="blog-post">
+					<h2 class="blog-post-title">Order ID : {{order.id}} </h2>
+					<p class="blog-post-meta">
+
+               Order By : {{order.user}}<br>
+               Order Type : {{ order.type}}<br>
+               Currency Type : {{ order.currency_type}}<br>
+               Status : {{order.status}}<br>
+               Order Date and Time : {{order.date_time}}<br>
+               Maximum Currency Units : {{order.max_currency_quantity_units}}<br>
+               Minimum Currency Units : {{order.min_currency_quantity_units}}<br>
+               {% if order.type == "BUY" %} 
+               Maximum Buy Price : {{order.max_buy_price}}<br>
+               {% endif %}
+               {% if order.type == "SELL" %}
+               Minimum Sell Price : {{order.min_sell_price}}<br>
+               {% endif %}
+               {%if order.status == "Pending"%}
+               <form method="post" action= "{% url 'cancelorder' %}"><button type="submit" class="btn btn-primary" name="cancel_order_id" value= "{{order.id}}" >{% csrf_token %} Cancel Order</button></form>
+                
+                {%endif%}
+               </p>
+				</div>
+				 <hr class="my-4">
+			{% endfor %}
+			<hr class="my-4">
+        </div>
+      </div>
+    </div>
+    {% csrf_token %}
+       {% endblock %} 
+
+
+    

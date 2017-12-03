@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Line Chart Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script language="JavaScript">
+  function updateprice(){
+     $(document).ready(function(){
+
+
+            var request;
+
+
+            request = $.ajax({
+                type: 'POST',
+                url: "localhost:8000/mocktrade/update_price_all",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                },
+                datatype: "json"
+            });
+
+            request.done(function(msg) {
+                console.log("ok");
+
+                var price = $("#price");
+
+                price.innerText =  msg['BTC'];
+
+
+                //listItem[1].innerText = msg['BTC'];
+                //listItem2[0].innerText = 1.0/msg['BTC'];
+                //listItem[2].innerText = msg['ETH'];
+                //listItem2[1].innerText = 1.0/msg['ETH'];
+                //listItem[3].innerText = msg['LTC'];
+                //listItem2[2].innerText = 1.0/msg['LTC'];
+                //var balance = parseFloat(btc)*msg['BTC'] + parseFloat(ltc)*msg['LTC'] + parseFloat(eth)*msg['ETH']+
+                //parseFloat(usd);
+                //bal.children()[1].innerText = balance;
+
+
+
+            });
+
+            request.fail(function(jqXHR, textStatus) {
+                $("#result").html("Request failed: " + textStatus);
+            });
+        });
+
+    }
+
+
+  function displayLineChart() {
+    var data = {
+        labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        datasets: [
+            {
+                label: "BTC",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+            },
+            {
+                label: "ETH",
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",
+                data: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+            },
+            {
+                label: "LTC",
+                fillColor: "rgba(100,200,205,0.2)",
+                strokeColor: "rgba(100,200,205,1)",
+                pointColor: "rgba(100,200,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(100,200,205,1)",
+                data: [0, 2, 4, 5, 9, 11, 12, 13, 21, 24]
+            }
+        ]
+    };
+    var ctx = document.getElementById("lineChart").getContext("2d");
+    var options = { };
+    var lineChart = new Chart(ctx).Line(data, options);
+  }
+  </script>
+</head>
+<body onload="displayLineChart();">
+  <div class="box">
+    <canvas id="lineChart" height="450" width="800"></canvas>
+  </div>
+    <div id='price'></div>
+</body>
+</html>

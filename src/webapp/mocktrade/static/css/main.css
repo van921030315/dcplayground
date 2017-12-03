@@ -1,0 +1,29 @@
+
+/* background image for the main page */
+#grad-main {
+
+    width:100%;
+    background: linear-gradient(0deg, navy 25%, lightsteelblue 50%, navy 75%);
+    text-shadow: 3px 2px gold;
+    color:white;
+    opacity:0.95;
+}
+
+#title-main {
+    color: navy;
+    font-size: 80px;
+    font-family: "Arial Black", Gadget, sans-serif;
+}
+
+
+#subtitle {
+    margin: 0 0 10px;
+    font-style: italic;
+    font-family: sans-serif;
+    text-shadow: none;
+    color: gold;
+}
+
+#body-main{
+    background:lightsteelblue;
+}

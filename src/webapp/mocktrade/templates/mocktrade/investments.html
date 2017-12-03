@@ -1,0 +1,95 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground Dashboard{% endblock %}
+   
+   {% block sidebar%}
+            <li ><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li class="active"><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+{% endblock%}
+   {% block content %}
+  <h2 class="sub-header">Investment Distribution</h2>
+  Generated Date and Time : {{now}}
+			<hr class="my-4">
+    {% csrf_token %}
+   {% block chart_version %}  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.bundle.min.js"></script>    {% endblock %} 
+    
+    
+
+     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<canvas id="pie-chart" width="900" height="500"></canvas>
+
+<script>
+ var btc,usd,ltc,eth;
+ getPieChartChanges();
+ makePieChartChanges();
+ new Chart(document.getElementById("pie-chart"), {
+    type: 'pie',
+    data: {
+      labels: ["USD", "BTC", "ETH", "LTC"],
+      datasets: [{
+        label: "Investment Distribution in USD Units",
+        backgroundColor: ["#396AB1", "#6B4C9A","#922428","#3E9651"],
+        data: [usd,btc,eth,ltc]
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Your Investment Distribution in USD, Bitcoin, Ethereum and Litecoin '
+      }
+    }
+      });
+ 
+function getPieChartChanges()
+{  
+console.log("Get");
+      $.get("../../mocktrade/getuserinvestments").done(function(data) 
+      {
+       ltc=data['LTC']
+        btc=data['BTC']
+        eth= data['ETH']
+        usd= data['USD']
+      })
+ }     
+   function makePieChartChanges()
+   {
+   console.log("Make");
+        new Chart(document.getElementById("pie-chart"), {
+    type: 'pie',
+    data: {
+      labels: ["USD", "BTC", "ETH", "LTC"],
+      datasets: [{
+        label: "Investment Distribution in USD Units",
+        backgroundColor: ["#396AB1", "#6B4C9A","#922428","#3E9651"],
+        data: [usd,btc,eth,ltc]
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Your Investment Distribution in USD, Bitcoin, Ethereum and Litecoin '
+      }
+    }
+      });
+   }     
+      
+    setInterval(function(){
+     getPieChartChanges();
+     makePieChartChanges();
+    }, 4000);
+
+</script>
+
+
+   {% endblock %} 

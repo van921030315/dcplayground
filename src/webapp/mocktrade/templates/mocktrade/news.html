@@ -1,0 +1,54 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground - Manual Predictions{% endblock %}
+
+
+
+
+    {% block content%}
+        <h1 class="sub-header">News</h1>
+
+      <!-- Project One -->
+
+
+        {% for news in content %}
+
+        <div class="col-md-13">
+           {% for key, value in news.items %}
+            {% if key == '2' %}
+              <a class="btn btn-primary" href="{{ value }}">View Source</a>
+
+            {% elif key == '1'%}
+
+              <h3> {{value|striptags}} </h3>
+          {% elif key == '3'%}
+            <p>{{value|striptags}}</p>
+          {%endif%}
+
+          {% endfor %}
+
+          <hr>
+        </div>
+          {% endfor %}
+
+
+
+      <!-- /.row -->
+
+
+
+        </div>
+      </div>
+    </div>
+    {% csrf_token %}
+
+
+    {% endblock %}
+
+    {% block sidebar2%}
+
+    {% endblock %}
+
+     {% block sidebar3%}
+
+    {% endblock %}

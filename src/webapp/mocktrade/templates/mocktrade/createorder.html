@@ -1,0 +1,41 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground - Create Order{% endblock %}
+   
+   {% block content %}
+          <h2 class="sub-header">Create Order</h2>
+           <form method="post" action="{% url 'postorder' %}">
+            <div class="row">
+               <div class="col-md-6"><h5> Select your type of Order</h5>
+             <input  id='buy_dc_text' type = "text" class="form-textbox" name="currency_amount" id="exampleFormControlTextarea1" maxlength="30"></input>{% csrf_token %}
+             <select name="currency_type_order" id = "digital_currency_list_order">
+               <option name="currency_type_order" value = "BTC">BTC</option>
+               <option name="currency_type_order" value = "ETH">ETH</option>
+               <option name="currency_type_order" value = "LTC">LTC</option>
+             </select>
+
+             <select name="buy_or_sell" id = "buy_or_sell">
+               <option name="currency_type_buy_or_sell" value = "BUY">Buy</option>
+               <option name="currency_type_buy_or_sell" value = "SELL">Sell</option>
+             </select>
+             <br><br>Expected Buy or Sell Price 
+            <input  id='buy_dc_text' type = "text" class="form-textbox" name="order_amount" id="exampleFormControlTextarea1" maxlength="30"></input>{% csrf_token %}
+             <br><br>
+               <input  id='post_order' type="submit" class="btn btn-primary" value="Create Order">{% csrf_token %}
+               {% if order_errors == "True" %}
+                    <p style="color:red">{{buy_errors_desc}}</p>
+                     {% if form.errors %}
+                     <br><br>
+                     <p style="color:red">Unable to Buy Currency</p>
+                        {% for field in form %}
+                        {% if field.errors %}
+                        <p style="color:red">{{field.label}} : {{ field.errors| striptags  }}</p>
+                        {% endif %}
+                        {% endfor %}
+                     {% endif %}
+               {% endif %}
+               </div>
+            </div>
+          </form>
+    {% csrf_token %}
+   {% endblock %} 

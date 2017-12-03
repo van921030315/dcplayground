@@ -1,0 +1,46 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground - Manual Predictions{% endblock %}
+      {% block sidebar%}
+            <li><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li  class="active"><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+      {% endblock%}
+   {% block content %}
+           <h2 class="sub-header">Manual Predictions</h2>
+           <form method="post" action="{% url 'calculatepredictions' %}">
+            <div class="row">
+               <div class="col-md-6"> Note: Select the Increase/Decrease Percentages for each Currency (values between -1,000,000% and 1,000,000%)<br><br>
+             <h4> BTC Increase/Decrease Percentage: </h4> 
+             <input  id='buy_dc_text' type = "text" class="textbox1" name="percentage_btc" id="exampleFormControlTextarea1" maxlength="30" value="0.0"></input> %{% csrf_token %}
+             <br>
+             <br><h4> ETH Increase/Decrease Percentage: </h4>
+             <input  id='buy_dc_text' type = "text" class="textbox1" name="percentage_eth" id="exampleFormControlTextarea1" maxlength="30" value="0.0"></input> %{% csrf_token %}
+             <br>
+             <br><h4>LTC Increase/Decrease Percentage: </h4>
+             <input  type = "text" class="textbox" name="percentage_ltc" id="exampleFormControlTextarea1" maxlength="30" value="0.0"></input> % {% csrf_token %}<br><br>
+               <input  type="submit" class="btn btn-primary" value="Calculate">{% csrf_token %}
+               <br>
+               {% if errors == "True" %}
+                    <br><p style="color:red">{{errors_desc}}</p>
+                     {% if form.errors %}
+                     
+                     <p style="color:red">Unable to Calculate due to Invalid Inputs</p>
+                        {% for field in form %}
+                        {% if field.errors %}
+                        <p style="color:red">{{field.label}} : {{ field.errors| striptags  }}</p>
+                        {% endif %}
+                        {% endfor %}
+                     {% endif %}
+               {% endif %}
+               </div>
+            </div>
+    {% csrf_token %}
+   {% endblock %} 

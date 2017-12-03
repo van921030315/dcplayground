@@ -1,0 +1,28 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground - Manual Predictions{% endblock %}
+   {% block sidebar%}
+            <li><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li  class="active"><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+      {% endblock%}
+   {% block content %}
+           <h2 class="sub-header">Manual Prediction Results</h2>
+    <h4><br>If BTC changes by {{percentage_btc}}%, ETH changes by {{percentage_eth}}%, LTC changes by {{percentage_ltc}}%,
+     <br><br>
+     Your BTC value in USD will be {{new_btc_value}}, <br>
+     Your ETH value in USD will be {{new_eth_value}}, <br>
+     Your LTC value in USD will be {{new_ltc_value}} and <br>
+     <h4>
+     <br>
+     <h2> Your Total Balance will be {{new_balance}}  USD</h2>
+    <a href="{% url 'manualpredictions' %}">Click here to do another prediction calculation </a> 
+    {% csrf_token %}
+   {% endblock %} 

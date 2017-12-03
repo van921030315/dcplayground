@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+
+<html lang="en">
+<head>
+  <title>DC</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!--<link href="../../static/css/register.css" rel="stylesheet">-->
+  <link href="{% static 'css/register.css' %}" rel="stylesheet">
+  <link href="{% static 'css/main.css' %}" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+</head>
+<body id="body-main">
+
+<div id="grad-main" class="jumbotron text-center"  style="background-color: navy;padding: 8em;">
+  <h1 id="title-main">DC Playground</h1>
+  <p id="subtitle">A Mock Trading System Designed Specifically for Cryptocurrencies </p>
+</div>
+
+<div class="container">
+
+
+        <h2>Sign up</h2>
+  <form method="post" class="formBox">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <button type="submit">Sign up</button>
+    {% csrf_token %}
+  </form>
+  <br>
+  <a href = "{% url 'login' %}">Already have account? Sign in</a>
+
+</div>
+
+</body>
+</html>

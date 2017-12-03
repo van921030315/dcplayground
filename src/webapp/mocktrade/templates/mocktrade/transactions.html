@@ -1,0 +1,41 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground Dashboard{% endblock %}
+   
+   {% block sidebar%}
+            <li><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li   class="active"><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+      {% endblock%}
+   {% block content %}
+
+   
+  <h2 class="sub-header">Transactions</h2>
+    <a href="{% url 'export' %}"><b>Click here to export transactions as a CSV </b></a> 
+			<hr class="my-4">
+			{% for transaction in transactions %}
+				<div class="blog-post">
+					<h2 class="blog-post-title">Transaction ID : {{transaction.id}} </h2>
+					<p class="blog-post-meta">
+               Transaction By : {{transaction.user}}<br>
+               Currency Type : {{transaction.currency_type}}<br>
+               Transaction Amount (in USD) : {{transaction.amount}}<br>
+               Transaction Date and Time : {{transaction.date_time}} <br>
+               Transaction Type : {{transaction.transaction_type}}<br>
+               Value of {{transaction.currency_type}} at the time of transaction (in USD) : {{transaction.price_on_purchase}} </a></p></a></p>
+				</div>
+				 <hr class="my-4">
+			{% endfor %}
+			<hr class="my-4">
+        </div>
+      </div>
+    </div>
+    {% csrf_token %}
+   {% endblock %} 

@@ -1,0 +1,37 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+	{% block title %} Digital Currency Playground Dashboard{% endblock %}
+   {% block sidebar%}
+            <li><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li  class="active"><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+{% endblock%}
+   
+   {% block content %}
+  <h2 class="sub-header">Leaderboard</h2>
+  Generated Date and Time : {{now}}
+			<hr class="my-4">
+         <ol>
+			{% for user_account in user_accounts %}
+				<div class="blog-post">
+					<h2 class="blog-post-title"><li>{{user_account.user.username}} </h2>
+					<p class="blog-post-meta">
+               Username : {{user_account.user.username}} <br>
+               Total Balance : {{user_account.total_balance}}<br>
+
+				</div>
+				 <hr class="my-4">
+			{% endfor %}
+         </ol>
+			<hr class="my-4">
+ 
+    {% csrf_token %}
+   
+   {% endblock %} 

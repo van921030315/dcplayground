@@ -1,0 +1,63 @@
+body
+{
+  margin: 0px;
+  padding: 10px;
+  background: url(../images/bitcoins.jpg);
+}
+.container
+{
+  width: 30%;
+  height: 450px;
+  background: #fff;
+  margin: 0 auto;
+  border: 2px solid #fff;
+  box-shadow: 0 15px 40px rgba(0,0,0,.5);
+}
+
+.container h2
+{
+  text-align: center;
+  margin-top: 30px
+  font-family: Georgia;
+  padding: 0;
+  color: #3335bb;
+}
+.formBox p
+{
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+  font-size: 120%;
+  color: #6699ff;
+  height: 55px;
+}
+
+.formBox button[type="submit"]
+{
+  margin-top: 8px;
+  margin-left: 90px;
+  border: none;
+  outline: none;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 8px;
+  width: 210px;
+}
+
+.formBox button[type="submit"]:hover
+{
+  background: #a8a8a8;
+  height: 40px;
+}
+.formBox button[type="submit"]:focus
+{
+
+  border-bottom: 2px solid #809099;
+}
+
+.formBox button[type="submit"]
+{
+  font-size: 100%;
+  font-weight: bold
+}

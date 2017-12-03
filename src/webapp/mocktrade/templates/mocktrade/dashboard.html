@@ -1,0 +1,807 @@
+{% extends 'mocktrade/base.html' %}
+{% load staticfiles %}
+{% block sidebar%}
+            <li class="active"><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+{% endblock%}
+
+{% block content %}
+
+          <h2 class="sub-header">Trends</h2>
+          <button id="current"> 3 minutes </button>
+          <button id="week"> weekly view </button>
+          <button id="month"> monthly view </button>
+          <button id="year"> yearly view </button>
+
+          <div class="row">
+
+            <div class="col-md-6"><h5> Balance Trend</h5><canvas id="balanceChart" height="550" width="650"></canvas></div>
+
+            <div class="col-md-4 leftmargin"><h6> Bitcoin Trend</h6> <canvas id="btcChart" height="100" width="240"></canvas></div>
+            <div class="col-md-4 leftmargin"><h6> Ethereum Trend</h6> <canvas id="ethChart" height="100" width="240"></canvas></div>
+            <div class="col-md-4 leftmargin"><h6> Litecoin Trend</h6> <canvas id="ltcChart" height="100" width="240"></canvas></div>
+          </div>
+
+
+          <h2 class="sub-header">Prediction</h2>
+          <button id="next-hour"> next hour </button>
+          <button id="next-week"> next week </button>
+          <div id="prediction-type">
+
+		  </div>
+
+          <div class="row">
+
+            <div class="col-md-4"><h5 id="caption-btc">Bitcoin</h5>
+				<div id="text-prediction-btc">
+
+				</div>
+                 <canvas id="btcPredChart" height="100" width="180"></canvas>
+			</div>
+
+			  <div class="col-md-4"><h5 id="caption-eth">Ethereum</h5>
+				<div id="text-prediction-eth">
+
+				</div>
+                  <canvas id="ethPredChart" height="100" width="180"></canvas>
+			</div>
+
+			  <div class="col-md-4"><h5 id="caption-ltc">Litecoin</h5>
+				<div id="text-prediction-ltc">
+
+				</div>
+                  <canvas id="ltcPredChart" height="100" width="180"></canvas>
+			</div>
+
+          </div>
+          <div class="row">
+              <div class="col-md-4">
+
+              </div>
+              <div class="col-md-6">
+
+          </div>
+
+          </div>
+{% csrf_token %}
+
+
+{% endblock %}
+
+
+{% block dashboard_js %}
+
+Chart.defaults.global.showTooltips = false;
+
+    var balanceState = [];
+    var btcState = [];
+    var ltcState = [];
+    var ethState = [];
+    var type = 'minute'
+
+    var balanceChart
+    var lineChart1;
+    var lineChart2;
+    var lineChart3 ;
+
+    var lineChart1_p;
+    var lineChart2_p;
+    var lineChart3_p;
+
+    $( "#next-week" ).click(function() {
+        $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/getpredictionprice",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                    rate: 'daily',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                displayPrediction("daily", msg)
+              });
+           });
+    });
+
+    $( "#next-hour" ).click(function() {
+        $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/getpredictionprice",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                    rate: 'hourly',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                displayPrediction("hourly", msg)
+              });
+           });
+    });
+
+
+    function displayPrediction(rate, predictions) {
+
+        $( "#text-prediction-btc" ).empty();
+        $( "#text-prediction-eth" ).empty();
+        $( "#text-prediction-ltc" ).empty();
+        $( "#prediction-type" ).empty();
+        if(predictions['BTC'][1]-predictions['BTC'][0] > 0){
+            $( "#caption-btc").attr("style", "color:yellowgreen");
+        }else{
+            $( "#caption-btc").attr("style", "color:coral");
+        }
+
+        if(predictions['LTC'][1]-predictions['LTC'][0] > 0){
+            $( "#caption-ltc").attr("style", "color:yellowgreen");
+        }else{
+            $( "#caption-ltc").attr("style", "color:coral");
+        }
+
+        if(predictions['ETH'][1]-predictions['ETH'][0] > 0){
+            $( "#caption-eth").attr("style", "color:yellowgreen");
+        }else{
+            $( "#caption-eth").attr("style", "color:coral");
+        }
+
+        displayPredictionChart(predictions['BTC'], predictions['ETH'], predictions['LTC']);
+
+        if(rate == "daily") {
+          $( "#prediction-type" ).append("<h3> 6-day Prediction </h3><hr>");
+          $( "#text-prediction-btc" ).append("<hr>");
+          $( "#text-prediction-btc" ).append("<p>Predictions:</p>");
+
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-btc" ).append("<p>" + (i+1) + " day from now:" + predictions['BTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-btc" ).append("<p>" + (i+1) + " days from now:" + predictions['BTC'][i] + "</p>");}
+          }
+
+
+          /*
+          $( "#text-prediction-btc" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 6; i < 12; i++){
+              if( i == 6){
+                $( "#text-prediction-btc" ).append("<p>" + (i+1-6) + " day from now:" + predictions['BTC'][i] + "</p>");
+              }else{
+                $( "#text-prediction-btc" ).append("<p>" + (i+1-6) + " days from now:" + predictions['BTC'][i] + "</p>");
+              }
+          }
+          */
+
+          $( "#text-prediction-eth" ).append("<hr>");
+          $( "#text-prediction-eth" ).append("<p>Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-eth" ).append("<p>" + (i+1) + " day from now:" + predictions['ETH'][i] + "</p>");
+              }else{
+              $( "#text-prediction-eth" ).append("<p>" + (i+1) + " days from now:" + predictions['ETH'][i] + "</p>");}
+          }
+
+          /*
+          $( "#text-prediction-eth" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-eth" ).append("<p>" + (i+1) + " day from now:" + predictions['ETH'][i] + "</p>");
+              }else{
+              $( "#text-prediction-eth" ).append("<p>" + (i+1) + " days from now:" + predictions['ETH'][i] + "</p>");}
+          }
+          */
+
+          $( "#text-prediction-ltc" ).append("<hr>");
+          $( "#text-prediction-ltc" ).append("<p>Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " day from now:" + predictions['LTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " days from now:" + predictions['LTC'][i] + "</p>");}
+          }
+
+          /*
+          $( "#text-prediction-ltc" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " day from now:" + predictions['LTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " days from now:" + predictions['LTC'][i] + "</p>");}
+          }  */
+
+          }else{
+              $( "#prediction-type" ).append("<h3> 6-hour Prediction </h3><hr>");
+          $( "#text-prediction-btc" ).append("<hr>");
+          $( "#text-prediction-btc" ).append("<p>Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-btc" ).append("<p>" + (i+1) + " hous from now:" + predictions['BTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-btc" ).append("<p>" + (i+1) + " hous from now:" + predictions['BTC'][i] + "</p>");}
+          }
+          /*
+          $( "#text-prediction-btc" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 6; i < 12; i++){
+              if( i == 6){
+                $( "#text-prediction-btc" ).append("<p>" + (i+1-6) + " hour from now:" + predictions['BTC'][i] + "</p>");
+              }else{
+                $( "#text-prediction-btc" ).append("<p>" + (i+1-6) + " hours from now:" + predictions['BTC'][i] + "</p>");
+              }
+          }
+          */
+          $( "#text-prediction-eth" ).append("<hr>");
+          $( "#text-prediction-eth" ).append("<p>Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-eth" ).append("<p>" + (i+1) + " hour from now:" + predictions['ETH'][i] + "</p>");
+              }else{
+              $( "#text-prediction-eth" ).append("<p>" + (i+1) + " hours from now:" + predictions['ETH'][i] + "</p>");}
+          }
+          /*
+          $( "#text-prediction-eth" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-eth" ).append("<p>" + (i+1) + " hour from now:" + predictions['ETH'][i] + "</p>");
+              }else{
+              $( "#text-prediction-eth" ).append("<p>" + (i+1) + " hours from now:" + predictions['ETH'][i] + "</p>");}
+          }
+          */
+
+          $( "#text-prediction-ltc" ).append("<hr>");
+          $( "#text-prediction-ltc" ).append("<p>Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " hour from now:" + predictions['LTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " hours from now:" + predictions['LTC'][i] + "</p>");}
+          }
+          /*
+          $( "#text-prediction-ltc" ).append("<hr><p>Conservative Predictions:</p>");
+          for(var i = 0; i < 6; i++){
+              if(i == 0 ){
+                $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " hour from now:" + predictions['LTC'][i] + "</p>");
+              }else{
+              $( "#text-prediction-ltc" ).append("<p>" + (i+1) + " hours from now:" + predictions['LTC'][i] + "</p>");}
+          }
+          */
+
+        }
+    }
+
+    function displayPredictionChart(btc, eth, ltc) {
+
+      //console.log("pred!")
+      var data_eth = {
+          labels: [0,1,2,3,4,5],
+          datasets: [
+              {
+                  label: "eth",
+                  fillColor: "rgba(0, 38, 77,0.2)",
+                  strokeColor: "rgba(0, 38, 77,1)",
+                  pointColor: "rgba(0, 38, 77,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(220,220,220,1)",
+                  pointRadius: 0,
+                  data: eth
+              },
+          ],
+
+
+      };
+
+
+      var data_ltc = {
+          labels: [0,1,2,3,4,5],
+          datasets: [
+              {
+                  label: "ltc",
+                  fillColor: "rgba(0, 77, 153,0.2)",
+                  strokeColor: "rgba(0, 77, 153,1)",
+                  pointColor: "rgba(0, 77, 153,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(220,220,220,1)",
+                  pointRadius: 0,
+                  data: ltc
+              },
+          ],
+
+
+      };
+
+       var data_btc = {
+          type:'line',
+          labels: [0,1,2,3,4,5],
+          datasets: [
+              {
+                  label: "btc",
+                  fillColor: "rgba(0, 115, 230,0.2)",
+                  strokeColor: "rgba(0, 115, 230,1)",
+                  pointColor: "rgba(0, 115, 230,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(220,220,220,1)",
+                  pointRadius: 0,
+                  data: btc
+              },
+          ],
+
+
+      };
+
+      var options = {
+        tooltips: {
+        enabled: 'true',
+        },
+        responsive: true,
+         };
+
+      var ctx_btc = document.getElementById("btcPredChart").getContext("2d");
+      var ctx_eth = document.getElementById("ethPredChart").getContext("2d");
+      var ctx_ltc = document.getElementById("ltcPredChart").getContext("2d");
+
+      if (lineChart1_p) {
+          lineChart1_p.destroy();
+      }
+      if (lineChart2_p) {
+          lineChart2_p.destroy();
+      }
+      if (lineChart3_p) {
+          lineChart3_p.destroy();
+      }
+
+      lineChart1_p = new Chart(ctx_btc).Line(data_btc, options);
+      lineChart2_p = new Chart(ctx_eth).Line(data_eth, options);
+      lineChart3_p = new Chart(ctx_ltc).Line(data_ltc, options);
+
+    }
+
+
+    $( "#current" ).click(function() {
+        type = 'minute';
+        $(document).ready(function(){
+           updateprice();
+        });
+    });
+
+    $( "#week" ).click(function() {
+        //console.log('view hourly data');
+        type = 'hour';
+        $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/gethistoryprice_week",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                    rate: 'hour',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                //console.log("ok got old prices in the past week");
+                btcState = msg['BTC'];
+                ltcState = msg['LTC'];
+                ethState = msg['ETH'];
+                //console.log(btcState);
+                balanceState = msg['BAL'];
+                var update = 0;
+                displayBalanceHistChart(balance, btcState, ltcState, ethState);
+              });
+           });
+
+    });
+
+    $( "#month" ).click(function() {
+        type = 'month';
+        $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/gethistoryprice_week",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                    rate: 'day',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                //console.log("ok got old prices in the past month");
+                btcState = msg['BTC'];
+                ltcState = msg['LTC'];
+                ethState = msg['ETH'];
+                balanceState = msg['BAL'];
+                var update = 0;
+                displayBalanceHistChart(balance, btcState, ltcState, ethState);
+              });
+           });
+
+    });
+
+
+    $( "#year" ).click(function() {
+        type = 'year';
+        $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/gethistoryprice_week",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                    rate: 'year',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                //console.log("ok got old prices in the past month");
+                btcState = msg['BTC'];
+                ltcState = msg['LTC'];
+                ethState = msg['ETH'];
+                balanceState = msg['BAL'];
+                var update = 0;
+                displayBalanceHistChart(balance, btcState, ltcState, ethState);
+              });
+           });
+
+    });
+
+    function getHistoryPrices(){
+          $(document).ready(function(){
+              var request;
+              request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/gethistoryprice",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                },
+                datatype: "json"
+              });
+
+              request.done(function(msg) {
+                //console.log("ok got old prices");
+                btcState = msg['BTC'];
+                ltcState = msg['LTC'];
+                ethState = msg['ETH'];
+                balanceState = msg['BAL'];
+                var update = 0;
+                displayBalanceChart(balance, msg['BTC'][0],msg['ETH'][0], msg['LTC'][0], update);
+              });
+           });
+    }
+
+    function updateprice(){
+     $(document).ready(function(){
+            var request;
+            request = $.ajax({
+                type: 'POST',
+                url: "mocktrade/update_price_all",
+                data:
+                {
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    blockchain: 'all',
+                    currency: 'usd',
+                },
+                datatype: "json"
+            });
+
+            request.done(function(msg) {
+                var listItem = $("h2.price-header");
+                var listItem2 = $("span.price-header-inverse");
+                var bal = $("#balance");
+                var btc = $("#btc-amt").children()[1].innerText
+                var ltc = $("#ltc-amt").children()[1].innerText
+                var eth = $("#eth-amt").children()[1].innerText
+                var usd = $("#usd-amt").children()[1].innerText
+
+
+                listItem[1].innerText = msg['BTC'];
+                listItem2[0].innerText = 1.0/msg['BTC'];
+                listItem[2].innerText = msg['ETH'];
+                listItem2[1].innerText = 1.0/msg['ETH'];
+                listItem[3].innerText = msg['LTC'];
+                listItem2[2].innerText = 1.0/msg['LTC'];
+                var balance = parseFloat(btc)*msg['BTC'] + parseFloat(ltc)*msg['LTC'] + parseFloat(eth)*msg['ETH']+
+                parseFloat(usd);
+
+                bal.children()[1].innerText = balance.toFixed(4);
+                if (balanceState.length == 0) {
+                    getHistoryPrices()
+                } else{
+                  var update = 1;
+                  displayBalanceChart(balance, msg['BTC'],msg['ETH'], msg['LTC'], update);
+                }
+
+            });
+
+            request.fail(function(jqXHR, textStatus) {
+                $("#result").html("Request failed: " + textStatus);
+            });
+        });
+
+    }
+
+    function displayBalanceHistChart(balance, wbtcState, wethState, wltcState){
+      xaxis = [];
+      if(type == 'hour' || type == 'month' || type == 'year'){
+      if(type == 'hour'){
+          for(var i = 0; i < wbtcState.length; i++){
+            if(i%6 == 0){
+              xaxis.unshift(-i + "hours");
+            }else{
+            xaxis.unshift('.');}
+
+          }
+      }
+      if(type == 'month'){
+        for(var i = 0; i < wbtcState.length; i++){
+            if(i%3 == 0){
+              xaxis.unshift(-i + "days");
+            }else{
+            xaxis.unshift('.');}
+        }
+      }
+      if(type == 'year'){
+          for(var i = 0; i < wbtcState.length; i++){
+            if(i%18 == 0){
+              xaxis.unshift(-i + "days");
+            }else{
+            xaxis.unshift('.');}
+
+          }
+      }
+      //console.log('update!');
+      var data_balance = {
+          labels: xaxis,
+          datasets: [
+              {
+                  label: "Balance",
+                  fillColor: "rgba(220,220,220,0.2)",
+                  strokeColor: "rgba(220,220,220,1)",
+                  pointColor: "rgba(220,220,220,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(220,220,220,1)",
+                  pointRadius: 0,
+                  data: wbtcState
+              }
+          ]
+      };
+
+      var data_btc = {
+          labels: xaxis,
+          datasets: [
+              {
+                  label: "Balance",
+                  fillColor: "rgba(0, 115, 230,0.2)",
+                  strokeColor: "rgba(0, 115, 230,1)",
+                  pointColor: "rgba(0, 115, 230,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(0, 115, 230,1)",
+                  pointRadius: 0,
+                  data: wbtcState
+              }
+          ]
+      };
+
+      var data_ltc = {
+          labels: xaxis,
+          datasets: [
+              {
+                  label: "Balance",
+                  fillColor: "rgba(0, 38, 77,0.2)",
+                  strokeColor: "rgba(0, 38, 77,1)",
+                  pointColor: "rgba(0, 38, 77,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(0, 38, 77,1)",
+                  pointRadius: 0,
+                  data: wltcState
+              }
+          ]
+      };
+
+      var data_eth = {
+          labels: xaxis,
+          datasets: [
+              {
+                  label: "Balance",
+                  fillColor: "rgba(0, 77, 153,0.2)",
+                  strokeColor: "rgba(0, 77, 153,1)",
+                  pointColor: "rgba(0, 77, 153,1)",
+                  pointStrokeColor: "#fff",
+                  pointHighlightFill: "#fff",
+                  pointHighlightStroke: "rgba(0, 77, 153,1)",
+                  pointRadius: 0,
+                  data: wethState
+              }
+          ]
+      };
+
+      var ctx_balance = document.getElementById("balanceChart").getContext("2d");
+      var ctx_btc = document.getElementById("btcChart").getContext("2d");
+      var ctx_ltc = document.getElementById("ltcChart").getContext("2d");
+      var ctx_eth = document.getElementById("ethChart").getContext("2d");
+
+      var options = {
+        responsive: true,
+         };
+
+      if (balanceChart) {
+        balanceChart.destroy();
+      }
+      if (lineChart1) {
+        lineChart1.destroy();
+      }
+      if (lineChart2){
+        lineChart2.destroy();
+      }
+      if (lineChart3) {
+        lineChart3.destroy();
+      }
+      balanceChart = new Chart(ctx_balance).Line(data_balance, options);
+      lineChart1 = new Chart(ctx_ltc).Line(data_ltc, options);
+      lineChart2 = new Chart(ctx_btc).Line(data_btc, options);
+      lineChart3 = new Chart(ctx_eth).Line(data_eth, options);
+
+      }
+
+
+    }
+    function displayBalanceChart(balance, btc, eth, ltc, update) {
+
+    if (update == 1){
+      if (balanceState.length >= 10){
+          balanceState.shift();
+      }
+      balanceState.push(balance);
+      if (btcState.length >= 10){
+          btcState.shift();
+      }
+      btcState.push(btc);
+      if (ltcState.length >= 10){
+          ltcState.shift();
+      }
+      ltcState.push(ltc);
+      if (ethState.length >= 10){
+          ethState.shift();
+      }
+      ethState.push(eth);
+    }
+
+    if(type == 'minute'){
+    var data_balance = {
+        labels: [-270+'s', -240+'s', -210+'s', -180+'s', -150+'s', -120+'s', -90+'s', -60+'s', -30+'s', 00+'s'],
+        datasets: [
+            {
+                label: "Balance",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: balanceState
+            }
+        ]
+    };
+
+    var data_btc = {
+        labels: [-270+'s', -240+'s', -210+'s', -180+'s', -150+'s', -120+'s', -90+'s', -60+'s', -30+'s', 00+'s'],
+        datasets: [
+            {
+                label: "Balance",
+                fillColor: "rgba(0, 115, 230,0.2)",
+                strokeColor: "rgba(0, 115, 230,1)",
+                pointColor: "rgba(0, 115, 230,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(0, 115, 230,1)",
+                data: btcState
+            }
+        ]
+    };
+
+    var data_ltc = {
+        labels: [-270+'s', -240+'s', -210+'s', -180+'s', -150+'s', -120+'s', -90+'s', -60+'s', -30+'s', 00+'s'],
+        datasets: [
+            {
+                label: "Balance",
+                illColor: "rgba(0, 38, 77,0.2)",
+                strokeColor: "rgba(0, 38, 77,1)",
+                pointColor: "rgba(0, 38, 77,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(0, 38, 77,1)",
+                data: ltcState
+            }
+        ]
+    };
+
+    var data_eth = {
+        labels:[-270+'s', -240+'s', -210+'s', -180+'s', -150+'s', -120+'s', -90+'s', -60+'s', -30+'s', 00+'s'],
+        datasets: [
+            {
+                label: "Balance",
+                fillColor: "rgba(0, 77, 153,0.2)",
+                strokeColor: "rgba(0, 77, 153,1)",
+                pointColor: "rgba(0, 77, 153,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(0, 77, 153,1)",
+                data: ethState
+            }
+        ]
+    };
+
+    var ctx_balance = document.getElementById("balanceChart").getContext("2d");
+    var ctx_btc = document.getElementById("btcChart").getContext("2d");
+    var ctx_ltc = document.getElementById("ltcChart").getContext("2d");
+    var ctx_eth = document.getElementById("ethChart").getContext("2d");
+
+    var options = {
+      tooltips: {
+				enabled: true,
+				},
+      responsive: true,
+       };
+
+
+    if (balanceChart) {
+        balanceChart.destroy();
+      }
+      if (lineChart1) {
+        lineChart1.destroy();
+      }
+      if (lineChart2){
+        lineChart2.destroy();
+      }
+      if (lineChart3) {
+        lineChart3.destroy();
+      }
+
+
+    balanceChart = new Chart(ctx_balance).Line(data_balance, options);
+    lineChart1 = new Chart(ctx_ltc).Line(data_ltc, options);
+    lineChart2 = new Chart(ctx_btc).Line(data_btc, options);
+    lineChart3 = new Chart(ctx_eth).Line(data_eth, options);
+
+    }
+  }
+
+
+{% endblock %}

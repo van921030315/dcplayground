@@ -1,0 +1,58 @@
+{% extends "mocktrade/base.html" %}
+{% load staticfiles %}
+   {% block title %} Digital Currency Playground - Create Order{% endblock %}
+   {% block sidebar%}
+            <li ><a href="{% url 'dashboard' %}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'trade' %}">Trade</a></li>
+            <li><a href="{% url 'viewtransactions' %}">Transcations</a></li>
+            <li><a href="{% url 'viewcreatebuyorderpage' %}">Create Buy Orders</a></li>
+            <li class="active"><a href="{% url 'viewcreatesellorderpage' %}">Create Sell Orders</a></li>
+            <li><a href="{% url 'vieworders' %}">View Orders</a></li>
+            <li><a href="{% url 'leaderboard' %}">Leader Board</a></li>
+            <li><a href="{% url 'investments' %}">Investment Distribution</a></li>
+             <li><a href="{% url 'manualpredictions' %}">Manual Predictions</a></li>
+
+   {% endblock%}
+   {% block content %}          
+           <h2 class="sub-header">Create Sell Order</h2>
+           <form method="post" action="{% url 'postsellorder' %}">
+            <div class="row">
+               <div class="col-md-6"><h3> 1. Select the Type of Digital Currency</h3>        
+             Digital Currency Type: &emsp;
+             <select name="currency_type_order" id = "digital_currency_list_order">
+               <option name="currency_type_order" value = "BTC">BTC</option>
+               <option name="currency_type_order" value = "ETH">ETH</option>
+               <option name="currency_type_order" value = "LTC">LTC</option>
+             </select><br>
+             <h3> 2. Select the Quantity of Digital Currency to Sell</h3>
+             Minimum Number of Digital Currency Units to Sell: 
+             <br><input  id='buy_dc_text' type = "text" class="textbox1" name="min_currency_units" id="exampleFormControlTextarea1" maxlength="30" value="1.0"></input>{% csrf_token %}
+             <br>
+             <br>Maximum Number of Digital Currency Units to Sell: 
+             <br><input  id='buy_dc_text' type = "text" class="textbox1" name="max_currency_units" id="exampleFormControlTextarea1" maxlength="30" value="1.0"></input>{% csrf_token %}
+             <br><br>For example, Placing a sell order of 3-5 BTC will allow you to sell to someone who has posted buy order of 3-5 BTC.  
+             <h3> 3. Enter the Sell Price Ranges for Digital Currency</h3>
+             Minimum Selling Price in USD expected per unit of Cryptocurrency: <input  type = "text" class="textbox" name="min_sell_price" id="exampleFormControlTextarea1" maxlength="30"></input>{% csrf_token %}<br><br>
+               <input  type="submit" class="btn btn-primary" value="Create Sell Order">{% csrf_token %}
+               {% if order_errors == "True" %}
+                    <p style="color:red">{{buy_errors_desc}}</p>
+                     {% if form.errors %}
+                     <br><br>
+                     <p style="color:red">Unable to Place Sell Order</p>
+                        {% for field in form %}
+                        {% if field.errors %}
+                        <p style="color:red">{{field.label}} : {{ field.errors| striptags  }}</p>
+                        {% endif %}
+                        {% endfor %}
+                        {% for err in form.non_field_errors %}
+                        <p style="color:red">{{ err }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endif %}
+               </div>
+            </div>
+            
+ 
+          </form>
+    {% csrf_token %}
+   {% endblock %} 

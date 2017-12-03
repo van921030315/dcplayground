@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+  <div class="row">
+    <div class="col-sm-4">
+    </div>
+    <div class="col-sm-4">
+      <h2>Get Started</h2>
+      <hr>
+      <h3><a href="{% url 'login' %}">Sign in</a> here or <a href="{% url 'register' %}">Register</a> to explore the world of cryptocurrencies! </h3>
+      <hr>
+    </div>
+  </div>
+
+{% endblock %}
